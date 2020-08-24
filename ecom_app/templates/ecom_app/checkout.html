@@ -1,0 +1,172 @@
+{% extends 'ecom_app/main.html' %}
+{% load static %}
+{% block title_block %}
+  Checkout
+{% endblock %}
+
+{% block body_block %}
+  <div class="row">
+    <div class="col-lg-6">
+      <div class="card">
+        <div class="card-body">
+          <div class="" id="total_info">
+            <form class=""  method="post" id="shipping_form">
+              <!-- user info section -->
+              <div class="row" id="user_info">
+                <div class="form-group col-lg-6">
+                   <input type="text" class="form-control" name="user_name" placeholder="Name">
+                 </div>
+                 <div class="form-group col-lg-6">
+                    <input type="email" class="form-control" name="user_email" aria-describedby="emailHelp" placeholder="Email">
+                 </div>
+              </div>
+              <div class="" id="shipping_info_head">
+                <hr>
+                <p>Shipping Information</p>
+                <hr>
+              </div>
+
+              <!-- shipping info section -->
+              <div class="row" id="shipping_info">
+                <div class="form-group col-lg-6">
+                   <input type="text" class="form-control" name="address" placeholder="Address..">
+                 </div>
+                 <div class="form-group col-lg-6">
+                    <input type="text" class="form-control" name="city" placeholder="City..">
+                 </div>
+                 <div class="form-group col-lg-6">
+                    <input type="text" class="form-control" name="state" placeholder="State..">
+                  </div>
+                  <div class="form-group col-lg-6">
+                     <input type="text" class="form-control" name="zip_code" placeholder="Zip Code..">
+                  </div>
+                  <div class="form-group col-lg-6">
+                     <input type="text" class="form-control" name="country" placeholder="Country..">
+                  </div>
+              </div>
+              <input type="submit" value="Continue" class="btn btn-success btn-block" id="ship_form_btn">
+            </form>
+          </div>
+          <!-- paypal option start -->
+          <div id="payment_info">
+            <hr>
+            <span>Paypal Option</span>
+            <hr>
+            <!-- Set up a container element for the button -->
+            <div id="paypal-button-container"></div>
+            <!-- <button type="button" class="btn btn-outline-danger" id="make_payment" style="float:right;" >Make Payment</button> -->
+            <hr>
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="card">
+        <div class="card-body">
+            <a href="{% url 'ecom_app:cart' %}" class="btn btn-outline-dark">&#8592;Back to Cart</a>
+            <hr>
+            <h5>Order Summery..</h5>
+            <table class="table">
+              {% for item in items %}
+                <tr>
+                  <td><img src="{{ item.product.imageURL }}" alt="" class="cart_page_img"></td>
+                  <td><h6>{{ item.product.name }}</h6></td>
+                  <td><h6>${{ item.product.price }}</h6></td>
+                  <td><h6>x{{ item.quantity }}</h6></td>
+                </tr>
+              {% endfor %}
+            </table>
+            <h5>Items: {{ order.total_cart_items }}</h5>
+            <h5>Total: ${{ order.total_cart_amount|floatformat:2 }}</h5>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+
+{% endblock %}
+
+{% block script_block %}
+
+  <script src="https://www.paypal.com/sdk/js?client-id=AfDIpZJbrN9BVPGC0gGNIjE0t16-_DkjAnVguf9No3k1QrOXqWLgGmRiEYKPgWD_5JE-4gNi21tUZct1&currency=USD&disable-funding=credit"></script>
+  <script>
+    var total_amount='{{ order.total_cart_amount }}'
+    // Render the PayPal button into #paypal-button-container
+    paypal.Buttons({
+      style:{
+        color:'blue',
+        shape:'rect'
+      },
+
+        // Set up the transaction
+        createOrder: function(data, actions) {
+            return actions.order.create({
+                purchase_units: [{
+                    amount: {
+                        value: parseFloat(total_amount).toFixed(2)
+                    }
+                }]
+            });
+        },
+
+        // Finalize the transaction
+        onApprove: function(data, actions) {
+            return actions.order.capture().then(function(details) {
+                submitFormData()
+            });
+        }
+
+
+    }).render('#paypal-button-container');
+</script>
+
+  <script type="text/javascript">
+    var shipping='{{ order.shipping }}'
+    if(shipping=='False')
+    {
+      $('#shipping_info').hide()
+      $('#shipping_info_head').hide()
+    }
+    if(user !='AnonymousUser')
+    {
+      $('#user_info').hide()
+    }
+    if(user !='AnonymousUser' && shipping=='False')
+    {
+      $('#total_info').hide()
+      $('#payment_info').show()
+    }
+
+
+    $('#shipping_form').submit(function(e){
+      e.preventDefault();
+      $('#ship_form_btn').hide()
+      $('#payment_info').show()
+    });
+
+    function submitFormData()
+    {
+      $.ajax({
+        headers: {
+            'X-CSRFToken':csrftoken
+        },
+        url:'/process_order/',
+        type:'POST',
+        data:$('#shipping_form').serialize()+ "&total_amount=" + total_amount,
+        success:function(data){
+          alert('Your Transection is completed!!!')
+          deleteCookie('cart')
+          localStorage.cart_count=0
+          window.location.href="{% url 'ecom_app:store' %}"
+
+        }
+      });
+    }
+
+
+  </script>
+{% endblock %}

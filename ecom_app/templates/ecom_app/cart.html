@@ -1,0 +1,59 @@
+{% extends 'ecom_app/main.html' %}
+{% load static %}
+{% block title_block %}
+  Store
+{% endblock %}
+
+{% block body_block %}
+  <div class="row">
+
+    <div class="col-lg-12">
+      <div class="card">
+        <div class="card-body">
+          <a href="{% url 'ecom_app:store' %}" class="btn btn-outline-dark">&#8592;Continue Shopping</a>
+          <table class="table">
+            <tr>
+              <th>Items:<strong>{{ order.total_cart_items }}</strong></th>
+              <th>Totla:<strong>${{ order.total_cart_amount|floatformat:2 }}</strong></th>
+              <th>
+                <a href="{% url 'ecom_app:checkout' %}" class="btn btn-success" style="float:right;">Checkout</a>
+              </th>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-12">
+      <div class="card">
+        <div class="card-body">
+          <table class="table">
+            <tr>
+              <td><h6></h6></td>
+              <td><h6>Items</h6></td>
+              <td><h6>Price</h6></td>
+              <td><h6>Quantity</h6></td>
+              <td><h6>Total</h6></td>
+            </tr>
+
+            {% for item in items %}
+              <tr>
+                <td><img src="{{ item.product.imageURL }}" alt="" class="cart_page_img"></td>
+                <td><h6>{{ item.product.name }}</h6></td>
+                <td><h6>${{ item.product.price }}</h6></td>
+                <td>
+                  <h6 style="display:inline-block;">{{ item.quantity }}</h6>
+                  <div style="display:inline-block;">
+                    <img src="{% static 'images/up.png' %}" alt="" class="arrow_icon update-cart" style="margin-bottom:3px;" data-product="{{ item.product.id }}" data-action="add">
+                    <img src="{% static 'images/down.png' %}" alt="" class="arrow_icon update-cart" data-product="{{ item.product.id }}" data-action="remove">
+                  </div>
+                </td>
+                <td><h6>${{ item.get_total|floatformat:2 }}</h6></td>
+              </tr>
+            {% endfor %}
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+{% endblock %}

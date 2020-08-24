@@ -1,0 +1,36 @@
+{% extends 'ecom_app/main.html' %}
+{% load static %}
+{% block title_block %}
+  Login
+{% endblock %}
+
+{% block css_block %}
+  <link rel="stylesheet" href="{% static 'css/login.css' %}">
+{% endblock %}
+
+{% block body_block %}
+  <div class="wrapper fadeInDown">
+    <div id="formContent">
+      <form method="POST">
+        {% csrf_token %}
+        <br>
+        <input type="text" class="fadeIn second" name="username" placeholder="Enter Your UserName">
+        <input type="password" class="fadeIn third" name="password" placeholder="Enter Your Password">
+        <input type="submit" class="fadeIn fourth" value="Log In">
+      </form>
+
+      <!-- Remind Passowrd -->
+      <div id="formFooter">
+        <span>Don't have account? </span><a class="underlineHover" href="{% url 'ecom_app:register' %}">Please Register</a>
+      </div>
+
+    </div>
+  </div>
+{% endblock %}
+
+{% block script_block %}
+  <script type="text/javascript">
+    $('#cart_total').hide()
+    $('#cart_icon').hide()
+  </script>
+{% endblock %}
